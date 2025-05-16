@@ -85,7 +85,8 @@ Response:
 }
 ```
 
-###GET /profile
+### GET /profile
+
 Request header:
 
 ```
