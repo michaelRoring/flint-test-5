@@ -28,6 +28,14 @@ npm run start
 
 ## End points
 
+### GET /ping
+
+Response:
+
+```
+pong!
+```
+
 ### POST /register
 
 Request:
