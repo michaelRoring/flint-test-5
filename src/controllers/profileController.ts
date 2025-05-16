@@ -67,7 +67,7 @@ export const profileController = {
       res.status(200).json({
         status: "success",
         message: "Login successful.",
-        token: token,
+        token: `Bearer ${token}`,
         data: {
           id: profile._id,
           email: profile.email,
@@ -93,8 +93,10 @@ export const profileController = {
       });
     }
 
+    const pureToken = token.split(" ")[1];
+
     try {
-      const decodedToken = jwt.verify(token, JWT_SECRET) as {
+      const decodedToken = jwt.verify(pureToken, JWT_SECRET) as {
         id: string;
         email: string;
       };
