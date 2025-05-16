@@ -83,4 +83,41 @@ export const profileController = {
       });
     }
   },
+
+  seeUserDetail: async (req: Request, res: Response) => {
+    const token = req.headers.authorization;
+    if (!token) {
+      return res.status(401).json({
+        status: "error",
+        message: "Authorization token is missing",
+      });
+    }
+
+    try {
+      const decodedToken = jwt.verify(token, JWT_SECRET) as {
+        id: string;
+        email: string;
+      };
+
+      const profile = await ProfileModel.findById(decodedToken.id);
+
+      if (!profile) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: profile,
+      });
+    } catch (error) {
+      console.log("error :", error);
+      res.status(500).json({
+        status: "error",
+        message: "Failed to get user detail",
+      });
+    }
+  },
 };

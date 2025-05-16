@@ -94,4 +94,16 @@ export const ProfileModel = {
 
     return profile;
   },
+
+  findById: async (id: string): Promise<Profile | null> => {
+    const db = await getDB();
+    const profile = await db
+      .collection<Profile>(collectionName)
+      .findOne(
+        { _id: new ObjectId(id) },
+        { projection: { password: 0, password_plaintext: 0 } }
+      );
+
+    return profile;
+  },
 };
