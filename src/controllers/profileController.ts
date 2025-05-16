@@ -1,15 +1,36 @@
 import { Request, Response } from "express";
 import { ProfileModel } from "../models/Profile";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
+
+if (!JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined in .env file.");
+  process.exit(1);
+}
 
 export const profileController = {
   registerUser: async (req: Request, res: Response) => {
     try {
       const { email, password_plaintext, firstName, lastName, phoneNumber } =
         req.body;
+
+      if (!email || !password_plaintext || !firstName || !lastName) {
+        return res.status(400).json({
+          status: "error",
+          message: "Email, password, firstName, and lastName are required.",
+        });
+      }
+
+      const existingProfile = await ProfileModel.findByEmail(email);
+      if (existingProfile) {
+        return res.status(409).json({
+          status: "error",
+          message: "User with this email already exists.",
+        });
+      }
+
       const profile = await ProfileModel.create({
         email,
         password_plaintext,
@@ -36,9 +57,23 @@ export const profileController = {
       const { email, password_plaintext } = req.body;
       const profile = await ProfileModel.login({ email, password_plaintext });
 
-      res.status(201).json({
+      const payload = {
+        id: profile._id,
+        email: profile.email,
+      };
+
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
+
+      res.status(200).json({
         status: "success",
-        data: profile,
+        message: "Login successful.",
+        token: token,
+        data: {
+          id: profile._id,
+          email: profile.email,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+        },
       });
     } catch (error) {
       console.log("error :", error);

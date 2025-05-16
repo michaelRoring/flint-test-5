@@ -65,6 +65,15 @@ export const ProfileModel = {
     };
   },
 
+  findByEmail: async (email: string): Promise<Profile | null> => {
+    const db = await getDB();
+    const profile = await db
+      .collection<Profile>(collectionName)
+      .findOne({ email });
+
+    return profile;
+  },
+
   login: async ({ email, password_plaintext }: ProfileLoginData) => {
     const db = await getDB();
     const profile = await db
